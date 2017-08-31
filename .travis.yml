@@ -1,2 +1,9 @@
 language: node_js
 node_js: node
+deploy:
+  provider: heroku
+  api_key:
+    secure: WNa7HeQs+8d+5TboOpMU0xkzsb6mJUQggGcWUBnG3SFAmoDcH00339Ot1iW/5Uy27GRNwzzVEaGfTjPc2iZupzzieNKzE+tP3qV39dDUg9QZgnhm/0/t+Jc3vlpOetxpo9ubPbuapnzDZ1iLc8mi7NodDdRAoCSU9DvE/mtgenqeZKbF3uNbkDF50GYdrxXpUEFr7x/5keusyraa2ESgY7q8qwpP8Uhyzj+RESE0VI7BDbCTCjlY1+SX/hACoRNRLb931fUP6KROlbi0dll+WfV2iKOtENeucjpUlzL2FslCuCXXQjQdQgdhUrpH+sCSh//+qJ0tXrdPmyoJzY7PdnlditdOetU8KsTPDj0x96JRFtfZ9CEueesk496QFzt9RGBZbqKOZbe0nD481RCrAqnLsHHeTdfUOnU0/edKlTFd5VGqNEYBU1bvbFi10jw+Z61QgvAqCeBDQrpn9n2Bw+jwbU9Ug7yA630e7eHTez6UlrXz0C7Cyp1/ThTrTqjs1urmre7errU4a+Ibxk+ZHr4Lf56bccOPfQEkWBMOqvfNHxt2PutuNMnEKwD+05HMi9pJjXqAUkH0lur5DUYpqbbeJOkGRHW7PAN5DK1guqwvXD0fb1CBs10BEYI5ASLOOO2N9EcG2AQ8V4pUfxOLqXOgSh1q5oZg2CbCeVBMulw=
+  app: glacial-plains-25350
+  on:
+    repo: gcaliene/Blog-API
