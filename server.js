@@ -1,92 +1,57 @@
-
 const express = require('express');
-const router = express.Router();
 const morgan = require('morgan');
-const bodyParser = require('body-parser');
 
-const {BlogPosts} = require('./models');
-
-const jsonParser = bodyParser.json();
+const blogPostsRouter = require('./blogPostsRouter');
 const app = express();
 
-// log the http layer
+
 app.use(morgan('common'));
 
-// we're going to add some blogs to BlogPosts
-// so there's some data to look at
-BlogPosts.create('beans', 'beans are so good', 'hemingway', '1999');
-BlogPosts.create('tomatoes', "this is used to make ketchup", 'proust', '1963');
-BlogPosts.create('peppers', "super spicy sometimes", 'suess', "1491");
+// you need to import `blogPostsRouter` router and route
+// requests to HTTP requests to `/blog-posts` to `blogPostsRouter`
+app.use('/blog-posts', blogPostsRouter);
 
+// both runServer and closeServer need to access the same
+// server object, so we declare `server` here, and then when
+// runServer runs, it assigns a value.
+let server;
 
-// when the root of this router is called with GET, return
-// all current ShoppingList items
-app.get('/blogs', (req, res) => {
-  res.json(BlogPosts.get());
-});
-
-app.post('/blogs', jsonParser, (req, res) => {
-  // ensure `name` and `budget` are in request body
-  const requiredFields = ['title', 'content', 'author', 'publishDate'];
-  for (let i=0; i<requiredFields.length; i++) {
-    const field = requiredFields[i];
-    if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
-      console.error(message);
-      return res.status(400).send(message);
-    }
-  }
-
-  const item = BlogPosts.create(req.body.title, req.body.content, req.body.author, req.body.publishDate);
-  res.status(201).json(item);
-});
-
-// when PUT request comes in with updated item, ensure has
-// required fields. also ensure that item id in url path, and
-// item id in updated item object match. if problems with any
-// of that, log error and send back status code 400. otherwise
-// call `ShoppingList.update` with updated item.
-
-
-app.put('/blogs/:id', jsonParser, (req, res) => {
-  const requiredFields = ['title', 'content', 'author', 'publishDate'];
-  for (let i=0; i<requiredFields.length; i++) {
-    const field = requiredFields[i];
-    if (!(field in req.body)) {
-      const message = `Missing \`${field}\` in request body`
-      console.error(message);
-      return res.status(400).send(message);
-    }
-  }
-
-  if (req.params.id !== req.body.id) {
-    console.log('here');
-    const message = `Request path id (${req.params.id}) and request body id (${req.body.id}) must match`;
-    console.error(message);
-    return res.status(400).send(message);
-  }
-  console.log(`Updating blog item \`${req.params.id}\``);
-  BlogPosts.update({
-    id: req.params.id,
-    title: req.body.title,
-    content: req.body.content,
-    author: req.body.author,
-    publishDate: req.body.publishDate || Date.now()
+// this function starts our server and returns a Promise.
+// In our test code, we need a way of asynchronously starting
+// our server, since we'll be dealing with promises there.
+function runServer() {
+  const port = process.env.PORT || 8080;
+  return new Promise((resolve, reject) => {
+    server = app.listen(port, () => {
+      console.log(`Your app is listening on port ${port}`);
+      resolve(server);
+    }).on('error', err => {
+      reject(err)
+    });
   });
-  res.status(204).end();
-});
+}
 
+// like `runServer`, this function also needs to return a promise.
+// `server.close` does not return a promise on its own, so we manually
+// create one.
+function closeServer() {
+  return new Promise((resolve, reject) => {
+    console.log('Closing server');
+    server.close(err => {
+      if (err) {
+        reject(err);
+        // so we don't also call `resolve()`
+        return;
+      }
+      resolve();
+    });
+  });
+}
 
-// when DELETE request comes in with an id in path,
-// try to delete that item from ShoppingList.
-app.delete('/blogs/:id', (req, res) => {
-  BlogPosts.delete(req.params.id);
-  console.log(`Deleted blog item \`${req.params.ID}\``);
-  res.status(204).end();
-});
+// if server.js is called directly (aka, with `node server.js`), this block
+// runs. but we also export the runServer command so other code (for instance, test code) can start the server as needed.
+if (require.main === module) {
+  runServer().catch(err => console.error(err));
+};
 
-
-
-app.listen(process.env.PORT || 8080, () => {
-  console.log(`Your app is listening on port ${process.env.PORT || 8080}`);
-});
+module.exports = {app, runServer, closeServer};
